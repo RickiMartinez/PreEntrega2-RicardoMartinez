@@ -1,71 +1,85 @@
-alert("Lista de Producto, Para Finalizar la compra ingrese 0")
-let seleccionarProductos = [
-  { id: 1, nombre: "Buzo", precio: 2000 },
-  { id: 2, nombre: "Remera", precio: 1000 },
-  { id: 3, nombre: "Jean", precio: 3000 },
-  { id: 4, nombre: "Zapatilla", precio: 4000 },
-];
+const frutas = [
+  { nombre: 'Manzana', precio: 10 },
+  { nombre: 'Pera', precio: 20 },
+  { nombre: 'Plátano', precio: 25 },
+  { nombre: 'Uva', precio: 30 },
+  { nombre: 'Naranja', precio: 35 }
+  ];
 
-let seleccionarCantidad;
-let total = 0;
-
-let carrito = [];
-
-const cantidad = (cant, precio) => {
-  return cant * precio
-}
-
-
-while (seleccionarProductos != 0) {
-  switch (seleccionarProductos) {
-    case 1:
-      seleccionarCantidad= Number(prompt("El producto seleccionado es Buzo, indique la cantidad"))
-            total += cantidad(seleccionarCantidad, 2000)
-      break;
-      case 2:
-        seleccionarCantidad = Number(prompt("El producto seleccionado es Remera, indique la cantidad"))
-        total += cantidad(seleccionarCantidad, 1000)
-      break;
-    case 3:
-      seleccionarCantidad = Number(prompt("El producto seleccionado es Jean, indique la cantidad"))
-      total += cantidad(seleccionarCantidad, 3000)
-    break;
-    case 4:
-      seleccionarCantidad = Number(prompt("El producto seleccionado es Zapatillas, indique la cantidad"))
-      total += cantidad(seleccionarCantidad, 4000)
-    break;
-
-    default:
-      break;
-  }
-  seleccionarProductos = Number(prompt( "1-Buzo $2000 2-Remera $1000 3-Jean $3000 4-Zapatillas $4000 "))
-}
-
-alert("el total de la compra es de: " + total)
-
-
-const envio = () => {
-    if (total >= 10000) {
-      alert("El envio es gratuito")
-    }else{
-      total += 1000
-      alert("el costo de envio es de 1000, el total es: " + total)
-    }
-}
-
- envio()
-
-const metodoDePago = () => {
-  let metodo = prompt("Ingrese el metodo de pago, tarjeta o efectivo" )
-  if (metodo == "tarjeta") {
-    total *= 1.1
-    console.log(total);
-  }else if ( metodo == "efectivo") {
-    total -= 1000
-    alert("tenes un descuento de 1000, el total es:" + total)
-  }
-
+  const addButtons = document.getElementsByClassName("add-button");
+  const removeButtons = document.getElementsByClassName("remove-button");
+  const cancelButton = document.getElementById("cancel-button");
+  const finishButton = document.getElementById("finish-button");
   
-}
-
-metodoDePago()
+  let carrito = [];
+  let total = 0;
+  
+  function updateTotal() {
+    total = 0;
+    for (let i = 0; i < carrito.length; i++) {
+      total += carrito[i].precio * carrito[i].cantidad;
+    }
+    document.getElementById("total").innerHTML = "$" + total.toFixed(2);
+  }
+  
+  function agregarFruta(nombre, precio) {
+    for (let i = 0; i < carrito.length; i++) {
+      if (carrito[i].nombre === nombre) {
+        carrito[i].cantidad++;
+        return;
+      }
+    }
+    carrito.push({ nombre, precio, cantidad: 1 });
+  }
+  
+  function eliminarFruta(nombre) {
+    for (let i = 0; i < carrito.length; i++) {
+      if (carrito[i].nombre === nombre) {
+        carrito[i].cantidad--;
+        if (carrito[i].cantidad === 0) {
+          carrito.splice(i, 1);
+        }
+        return;
+      }
+    }
+  }
+  
+  function guardarCarrito() {
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+  }
+  
+  function cargarCarrito() {
+    const datosCarrito = localStorage.getItem("carrito");
+    if (datosCarrito !== null) {
+      carrito = JSON.parse(datosCarrito);
+    }
+  }
+  
+  for (let i = 0; i < addButtons.length; i++) {
+    addButtons[i].addEventListener("click", function() {
+      agregarFruta(frutas[i].nombre, frutas[i].precio);
+      updateTotal();
+      guardarCarrito();
+    });
+    removeButtons[i].addEventListener("click", function() {
+      eliminarFruta(frutas[i].nombre);
+      updateTotal();
+      guardarCarrito();
+    });
+  }
+  
+  cancelButton.addEventListener("click", function() {
+    carrito = [];
+    updateTotal();
+    guardarCarrito();
+  });
+  
+  finishButton.addEventListener("click", function() {
+    alert("Compra finalizada por un total de $" + total.toFixed(2));
+    carrito = [];
+    updateTotal();
+    guardarCarrito();
+  });
+  
+  cargarCarrito();
+  updateTotal();
